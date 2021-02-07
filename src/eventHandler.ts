@@ -1,5 +1,14 @@
 import { createPluginAPI, createUIAPI } from "figma-jsonrpc";
 
+let nodes = [];
+
+const traverseNode = (node: any) => {
+  if (node.children) {
+    node.children.forEach((nodeChild) => traverseNode(nodeChild));
+  }
+  nodes.push(node.id);
+};
+
 export const eventHandler = createPluginAPI({
   getCommand() {
     return figma.command;
@@ -10,6 +19,9 @@ export const eventHandler = createPluginAPI({
   setWindowSize(width: number, height: number) {
     return figma.ui.resize(width, height)
   },
+  notify(message: string) {
+    figma.notify(message);
+  },
   placeSvg(svg: any) {
     const page = figma.currentPage;
     let node = figma.createNodeFromSvg(svg);
@@ -18,6 +30,26 @@ export const eventHandler = createPluginAPI({
       return;
     }
     page.appendChild(node)
+  },
+  addRelaunch(fileKey: string) {
+    let node = figma.currentPage;
+    if (!node) {
+      figma.notify('Please select frame');
+      return;
+    }
+    figma.root.setPluginData('fileKey', fileKey);
+    node.setRelaunchData({ relaunch: '' });
+  },
+  getRelaunch() {
+    return figma.root.getPluginData('fileKey');
+  },
+  getSelections() {
+    nodes = [];
+    const select = figma.currentPage.selection[0];
+    if (select) {
+      traverseNode(select);
+    }
+    return nodes;
   },
   createRectangles(count: number) {
     const nodes = [];
@@ -46,6 +78,7 @@ export const setEventCallback = (name: string, callback: Function) => {
 
 export const uiApi = createUIAPI({
   selectionChanged(selection) {
+    nodes = [];
     eventCallback.selectionChanged(selection.map((item) => item.id))
   },
   pageChanged(page) {

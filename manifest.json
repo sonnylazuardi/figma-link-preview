@@ -1,7 +1,14 @@
 {
   "name": "Link Preview",
-  "id": "738168449509241862",
+  "id": "937579386381611447",
   "api": "1.0.0",
   "main": "dist/code.js",
-  "ui": "dist/ui.html"
+  "ui": "dist/ui.html",
+  "relaunchButtons": [
+    {
+      "command": "relaunch",
+      "name": "Open Figma Link Preview",
+      "multipleSelection": false
+    }
+  ]
 }
